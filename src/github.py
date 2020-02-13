@@ -11,37 +11,44 @@ github_accounts = {
         7: ['GithubFake08', 'PO11sd*^%$']}
 
 def parse_skills(text:str, database):
-    text_skills = []
-    items = []
     related_files = []
+    items = []
     lines = text.split("\n")
     for line in lines:
         if line[1:7] == "import":
             item = line[8:-1].lstrip().split(".")[-1]
-            if item in database[0]:
-                items.append(item)
-                related_files.append([])
-                text_skills.append([])
-            else:
-                continue
+            for line in database[0]:
+                if item is line[0]:
+                    items.append(item)
+                    for line2 in database[1]:
+                        if item is (line2[1]).split(".")[-1]:
+                            related_files.append("%s-%s" % (item, line2[0]))
+                        else:
+                            pass
+                else:
+                    pass
         else:
             continue
-    return (items, text_skills, related_files)
+    return (items, related_files)
 
 def get_skills_db():
+    db1 = []
+    db2 = []
     conn = psycopg2.connect(
         user='postgres',
-        password='1234',
+        password='password',
         host='127.0.0.1',
         port='5432',
-        database='dev'
+        database='github'
     )
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM actor LIMIT 10')
-    for row in cursor: print(row)
+    cursor.execute('SELECT * FROM public."API"')
+    for row in cursor: db1.append(row)
+    cursor.execute('SELECT * FROM public."file_API"')
+    for row in cursor: db2.append(row)
     conn.close()
     
-    return ([], [])
+    return (db1, db2)
 
 def get_pull_requests(owner="Jabref", 
                       repo="jabref", 
@@ -146,8 +153,10 @@ def get_pull_requests(owner="Jabref",
         try:
             data = []
             for file in commit_result["files"]:
-                data.append(parse_skills(file["patch"], db))
-            print(data)
+                (skills, related_files) = parse_skills(file["patch"], db)
+                skill_str = ",".join(skills)
+                rf_str = ",".join(related_files)
+                data.append("%s|%s|%s"%(file,skill_str,rf_str))
         except:
             pass
 
@@ -167,12 +176,23 @@ def get_pull_requests(owner="Jabref",
             ]
         except Exception as ex:
             pr = ["pull errored", str(ex)]
+
+        try:
+            sk = [
+                index,
+                result_value(["title"], "N/A"),
+                result_value(["body"], "N/A"),
+                data
+            ]
+        except Exception as ex:
+            sk = ["pull errored", str(ex)]
         
         try:
             result["message"]
         except:
             general_list.append(general)
             pr_list.append(pr)
+            skills_list.append(sk)
 
         if int(response.headers["X-RateLimit-Remaining"]) < limit:
             time.sleep(int(response.headers["X-RateLimit-Reset"]))
