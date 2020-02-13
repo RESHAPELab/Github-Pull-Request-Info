@@ -1,5 +1,7 @@
 import requests, time, psycopg2
 
+NULL = None
+
 github_accounts = {
         0: ['Githubfake01', '5RNsya*z#&aA'],
         1: ['GithubFake02', '9dJeg^Bp^g63'],
@@ -32,8 +34,17 @@ def parse_skills(text:str, database):
     return (items, related_files)
 
 def get_skills_db():
-    db1 = []
-    db2 = []
+    db1 = [
+            ('SimpleDoubleProperty', 'javafx.beans.property.SimpleDoubleProperty', NULL),
+            ('XFootnote', 'com.sun.star.text.XFootnote', NULL),
+            ('DoubleProperty', 'javafx.beans.property.DoubleProperty', NULL)
+        ]
+    db2 = [
+            ('OpenOfficePanel.java', 'net.sf.jabref.gui.JabRefFrame', 4),
+            ('OpenOfficePanel.java', 'javax.swing.JButton', 38),
+            ('OpenOfficePanel.java', 'javax.swing.Icon', 13),
+            ('OpenOfficePanel.java', 'javax.swing.ButtonGroup', 6)
+        ]
     conn = psycopg2.connect(
         user='postgres',
         password='password',
@@ -41,6 +52,7 @@ def get_skills_db():
         port='5432',
         database='github'
     )
+    
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM public."API"')
     for row in cursor: db1.append(row)
@@ -156,7 +168,7 @@ def get_pull_requests(owner="Jabref",
                 (skills, related_files) = parse_skills(file["patch"], db)
                 skill_str = ",".join(skills)
                 rf_str = ",".join(related_files)
-                data.append("%s|%s|%s"%(file,skill_str,rf_str))
+                data.append("%s|%s|%s"%(file["filename"],skill_str,rf_str))
         except:
             pass
 
@@ -181,6 +193,7 @@ def get_pull_requests(owner="Jabref",
             sk = [
                 index,
                 result_value(["title"], "N/A"),
+                patch,
                 result_value(["body"], "N/A"),
                 data
             ]
