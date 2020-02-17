@@ -1,6 +1,7 @@
-import requests, time, psycopg2
+import requests, time, psycopg2, logging
 
 NULL = None
+logging.basicConfig(filename='.log', filemode='w', format='%(levelname)s: %(message)s')
 
 github_accounts = {
         0: ['Githubfake01', '5RNsya*z#&aA'],
@@ -10,7 +11,8 @@ github_accounts = {
         4: ['GithubFake05', 'Cm82$$bFa!xb'],
         5: ['GithubFake06', '2t*u2Y8P^tTk'],
         6: ['GithubFake07', 'Hk1233**012'],
-        7: ['GithubFake08', 'PO11sd*^%$']}
+        7: ['GithubFake08', 'PO11sd*^%$']
+    }
 
 def parse_skills(text:str, database):
     related_files = []
@@ -19,16 +21,24 @@ def parse_skills(text:str, database):
     for line in lines:
         if line[1:7] == "import":
             item = line[8:-1].lstrip().split(".")[-1]
+            if item == "*":
+                item = line[8:-1].lstrip().split(".")[-2]
             for line in database[0]:
                 if item is line[0]:
                     items.append(item)
                     for line2 in database[1]:
                         if item is (line2[1]).split(".")[-1]:
-                            related_files.append("%s-%s" % (item, line2[0]))
+                            skill = "None"
+                            for line2 in database[2]:
+                                if item == (line2[2]).split(".")[-1]:
+                                    skill = line2[0]
+                                else:
+                                    pass
+                            related_files.append("%s-%s" % (skill, line2[0]))
                         else:
-                            pass
+                            logging.warning("import \"%s\" is not recorded in files table" % item)
                 else:
-                    pass
+                    logging.warning("import \"%s\" is not recorded in api table" % item)
         else:
             continue
     return (items, related_files)
@@ -45,22 +55,35 @@ def get_skills_db():
             ('OpenOfficePanel.java', 'javax.swing.Icon', 13),
             ('OpenOfficePanel.java', 'javax.swing.ButtonGroup', 6)
         ]
+    db3 = [
+        ('XML', 'DOMParser', 'org.w3c.dom.Node'),
+        ('XML', 'DOMParser', 'org.w3c.dom.NamedNodeMap'),
+        ('XML', 'DOMParser', 'org.w3c.dom.html.HTMLAnchorElement'),
+        ('XML', 'DOMParser', 'org.w3c.dom.events.EventTarget')
+    ]
+
     conn = psycopg2.connect(
         user='postgres',
-        password='password',
-        host='127.0.0.1',
+        password='github-pulls',
+        host='',
         port='5432',
-        database='github'
+        database='skills'
     )
     
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM public."API"')
+
+
+    
+    cursor.execute('SELECT * FROM public."API"') # (api_name, class, count)
     for row in cursor: db1.append(row)
-    cursor.execute('SELECT * FROM public."file_API"')
+    cursor.execute('SELECT * FROM public."file_API"') # (file_name, api_name, count)
     for row in cursor: db2.append(row)
+    cursor.execute('SELECT * FROM public."API_specific"') # (general, specific, api_name_fk)
+    for row in cursor: db3.append(row)
+    
     conn.close()
     
-    return (db1, db2)
+    return (db1, db2, db3)
 
 def get_pull_requests(owner="Jabref", 
                       repo="jabref", 
