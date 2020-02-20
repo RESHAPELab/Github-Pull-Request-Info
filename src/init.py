@@ -4,7 +4,7 @@ def main():
     conn = psycopg2.connect(
         user='postgres',
         password='github-pulls',
-        host='',
+        host='github-skills.cubvdlwe6gij.us-east-1.rds.amazonaws.com',
         port='5432',
         database='skills'
     )

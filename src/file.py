@@ -12,5 +12,5 @@ def pulls_to_csv(start_pull, stop_pull, owner, repo, filename="", merged="true",
     df = pd.DataFrame(commits, columns=["Author login", "Committer login", "PR number", "SHA", "Commit Message", "file name", "Patch text", "# Additions", "# Deletions", "status", "changes"])
     df.to_csv('./data/%s-commits.csv' % filename, index=False, sep=sep)
 
-    df = pd.DataFrame(skills, columns=["PR Number", "Title", "Body", "Patch","Filename|Skills|(Skill-Related File)s"])
+    df = pd.DataFrame(skills, columns=["PR Number", "Title", "Body","[API Name|Skills|Related Files|Patch]"])
     df.to_csv('./data/%s-skills.csv' % filename, index=False, sep=sep)
