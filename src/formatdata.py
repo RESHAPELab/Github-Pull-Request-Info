@@ -1,4 +1,4 @@
-import database, logging, requests
+import database, logging, requests, base64, time, os
 
 database = database.query_db()
 github_accounts = {
@@ -12,22 +12,35 @@ github_accounts = {
         7: ['GithubFake08', 'PO11sd*^%$']
     }
 
-def get_patch(file, user, token):
+paths_memo = {}
+
+def file_exists(file, username, token):
     path = ""
 
     for line in database[3]:
         if file == line[0]:
-            path = line[1].split("/")[:6]
+            path = "/".join(line[1].split("/")[6:]) + "/" + file
 
-    try:
-        content_response = requests.get("https://api.github.com/repos/Jabref/jabref/content/%s" % path, auth=(username,token))
-        content = pr_response.text
-        return content
-    except:
-        return None
+    if path not in paths_memo:
+        passed = False
+        url = "../repos/jabref"
+        
+        # Print Path
+        if os.path.exists(url + path):
+            passed = True
+
+        paths_memo[path] = passed
+
+    return paths_memo[path]
 
 def get_api_name(line):
     found_api = False
+    if line[0] == "+":
+        api_status = "added"
+    elif line[0] == "-":
+        api_status = "removed"
+    else:
+        api_status = "other"
     if line[1:7] == "import":
         api_name = line[8:-1].lstrip().split(".")[-1]
         if api_name == "*":
@@ -43,7 +56,8 @@ def get_api_name(line):
     else:
         api_name = None
 
-    return api_name
+
+    return (api_name, api_status)
 
 def get_skills(api_name):
     found_skill = False
@@ -59,14 +73,14 @@ def get_skills(api_name):
     if not found_skill:
         logging.warning("import \"%s\" is not recorded in api_specific table" % api_name)
 
-    return ",".join(skills)
+    return skills
 
-def get_related_files(api_name):
+def get_related_files(api_name, user, password):
     found_file = False
     files = []
 
     for line2 in database[1]:
-        if api_name == (line2[1]).split(".")[-1]:
+        if api_name == (line2[1]).split(".")[-1] and file_exists(line2[0], user, password):
             files.append(line2[0])
             found_file = True
 
@@ -76,41 +90,40 @@ def get_related_files(api_name):
 
     return files
 
-def get_known_import(line, user, password):
-    api_name = get_api_name(line)
-    related_files = ""
-    patch = []
-    skills = ""
+def get_known_import(file_name, line, user, password):
+    (api_name, api_status) = get_api_name(line)
+    related_files = []
+    skills = []
+    grid = []
 
     if api_name is not None:
         #* Check Api DB
         skills = get_skills(api_name)
-        related_files_list = get_related_files(api_name)
-
-        for file in related_files_list:
-            temp_patch = get_patch(file, user, password)
-            if temp_patch is not None:
-                patch.append("%s-%s"%(file, temp_patch))
-        
-        ",".join(related_files_list)
-        ",".join(patch)
-        
-        return (api_name, skills, related_files, patch)
-    else:
-        return None
+        related_files = get_related_files(api_name, user, password)
+        # grid = [api_name, api_status, skills[0]]
+        try:
+            if related_files == [] and skills == []:
+                grid.append([file_name, api_name, api_status, "N/A", "N/A"])
+            elif related_files == []:
+                grid.append([file_name, api_name, api_status, skills[0], "N/A"])
+            elif skills == []:
+                for index in related_files:
+                    grid.append([file_name, api_name, api_status, "N/A", index])
+            else:
+                for index in related_files:
+                    grid.append([file_name, api_name, api_status, skills[0], index])
+        except Exception as e:
+            print(e)
+    return grid
 
 def parse_skills(text:str, file, user, password):
     lines = text.split("\n")
     results = []
     #* Get Import
     for line in lines:
-        result = get_known_import(line, user, password)
-
-        if result is None:
-            pass
-        else:
+        result = get_known_import(file["filename"], line, user, password)
+        if result != []:
             results.append(result)
-
     return results
 
 def result_value(result, value, default):
@@ -128,7 +141,69 @@ def result_value(result, value, default):
     except:
         return default
 
-def format_data(pr_num, pulls, commits, status, user, password):
+def get_issue(pr):
+    try:
+        issues = []
+        for item in re.findall("#([0-9])+\w+", pr["body"]):
+            issues.append(item.replace("#", ""))
+
+        for item in re.findall("#([0-9])+\w+", pr["title"]):
+            issues.append(item.replace("#", ""))
+        return issues
+    except:
+        return ["N/A"]
+
+def merge_comments(comments):
+    result = ""
+    for comment in comments:
+        result = result + " =||= " + comment["body"]
+    return result
+
+def format_data_issues(issue, comments):
+    try:
+        issue_results = [
+            result_value(issue, ["number"], "N/A"),
+            result_value(issue, ["closed_at"], "N/A"),
+            result_value(issue, ["user", "login"], "N/A"),
+            result_value(issue, ["title"], "N/A"),
+            result_value(issue, ["body"], "N/A"),
+            merge_comments(comments)
+        ]
+
+        return issue_results
+    except Exception:
+        return ["N/A", "N/A", "N/A", "N/A", "N/A"]
+
+
+def format_data_skills(pr_num, pulls, commits, status, user, password, comments):
+    try:
+        data = []
+        for file in commits["files"]:
+            skill_in_file = parse_skills(file["patch"], file, user, password)
+            for file_index in skill_in_file:
+                if skill_in_file != []:
+                    data.append(file_index[0])
+    except Exception as e:
+        print(e)
+
+    try:
+        skill_results = []  
+        for item in data:
+            for item2 in item[1:]:
+                skill_results.append(
+                [
+                    pr_num,
+                    result_value(pulls, ["title"], "N/A"),
+                    result_value(pulls, ["body"], "N/A"),
+                    item[0], item2[0], item2[1], item2[2], item2[3]
+                ])
+    except Exception as ex:
+        pass
+
+    return skill_results
+
+
+def format_data_pr(pr_num, pulls, commits, status, user, password, comments):
     try:
         files = "["
         patch = "["
@@ -140,63 +215,34 @@ def format_data(pr_num, pulls, commits, status, user, password):
     except:
         pass
 
-    try:
-        data = []
-        for file in commits["files"]:
-            (api_name, skills, related_files, patch_list) = parse_skills(file["patch"], file, user, password)
-            data.append("%s|%s|%s|%s"%(api_name, skills, related_files, patch_list))
-    except:
-        pass
+    issues = get_issue(pulls)
     
-    
+    pr_results = []
     try:
-        pr_result = [
-            pr_num,
-            result_value(pulls, ["user", "login"], "N/A"),
-            result_value(pulls, ["user", "id"], "N/A"),
-            result_value(pulls, ["state"], "N/A"),
-            result_value(pulls, ["created_at"], "N/A"),
-            result_value(pulls, ["closed_at"], "N/A"),
-            result_value(pulls, ["title"], "N/A"),
-            result_value(pulls, ["body"], "N/A"),
-            result_value(pulls, ["comments"], "N/A"),
-            result_value(pulls, ["review_comments"], "N/A"),
-            result_value(pulls, ["additions"], "N/A"),
-            result_value(pulls, ["deletions"], "N/A"),
-            result_value(pulls, ["commits"], "N/A"),
-            result_value(pulls, ["changed_files"], "N/A")
-        ]
+        for issue in issues:
+            pr_results.append([
+                pr_num,
+                result_value(pulls, ["closed_at"], "N/A"),
+                result_value(pulls, ["user", "login"], "N/A"),
+                result_value(pulls, ["title"], "N/A"),
+                result_value(pulls, ["body"], "N/A"),
+                merge_comments(comments),
+                issue
+            ])
     except Exception as ex:
         pass
-
-
-    
 
     try:
         commit_results = [
+            pr_num,
             result_value(commits, ["commit", "author", "name"], "N/A"),
-            result_value(commits, ["commit", "committer", "name"], "N/A"),
-            pr_num,
-            result_value(commits, ["sha"], "N/A"),
+            result_value(commits, ["commit", "committer", "date"], "N/A"),
             result_value(commits, ["commit", "message"], "N/A"),
-            files,
             patch,
-            result_value(commits, ["stats", "additions"], "N/A"),
-            result_value(commits, ["stats", "deletions"], "N/A"),
-            result_value(status, ["state"], "N/A"),
-            result_value(commits, ["stats", "total"], "N/A")
         ]
     except Exception as ex:
-        pass
-
-    try:
-        skill_results = [
-            pr_num,
-            result_value(pulls, ["title"], "N/A"),
-            result_value(pulls, ["body"], "N/A"),
-            data
+        commit_results = [
+            "N/A", "N/A","N/A","N/A","N/A"
         ]
-    except Exception as ex:
-        pass
 
-    return (pr_result, commit_results, skill_results)
+    return (pr_results, commit_results)
