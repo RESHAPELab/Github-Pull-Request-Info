@@ -3,8 +3,8 @@ import file, requests
 if __name__ == "__main__":
     start_pull= 0
 
-    owner = "Jabref"
-    repo = "jabref"
+    owner = "google"
+    repo = "ExoPlayer"
 
     stop_pull_json = requests.get("https://api.github.com/repos/%s/%s/pulls" % (owner, repo)).json()
     stop_issue_request = requests.get("https://api.github.com/search/issues?q=repo:%s/%s+type:issue" % (owner, repo)).json()
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     else:
         stop = stop_issue
     
-    stop = 30
+    # stop = 230
     print("scanning %i pulls\n\n\n" % stop)
 
     # Clean Data

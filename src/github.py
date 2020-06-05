@@ -35,52 +35,52 @@ def get_pull_requests(owner="Jabref",
         #* Gather Pull
         username = github_accounts[index%len(github_accounts)][0]
         token = github_accounts[index%len(github_accounts)][1]
-        # pr_response = requests.get("https://api.github.com/repos/Jabref/jabref/pulls/%i?state=%s&merged=%s" % (index,state,merged), auth=(username,token))
-        # pr_response_comments = requests.get("https://api.github.com/repos/Jabref/jabref/pulls/%i/comments?state=%s&merged=%s" % (index,state,merged), auth=(username,token))
-        # pr_result = pr_response.json()
-        # pr_result_comments = pr_response_comments.json()
+        pr_response = requests.get("https://api.github.com/repos/google/ExoPlayer/pulls/%i?state=%s&merged=%s" % (index,state,merged), auth=(username,token))
+        pr_response_comments = requests.get("https://api.github.com/repos/google/ExoPlayer/pulls/%i/comments?state=%s&merged=%s" % (index,state,merged), auth=(username,token))
+        pr_result = pr_response.json()
+        pr_result_comments = pr_response_comments.json()
         
-        # try:
-        #     commit_response = requests.get("https://api.github.com/repos/JabRef/jabref/commits/%s" % pr_result["head"]["sha"], auth=(username,token))
-        #     commit_result = commit_response.json()
-        # except:
-        #     pass
+        try:
+            commit_response = requests.get("https://api.github.com/repos/google/ExoPlayer/commits/%s" % pr_result["head"]["sha"], auth=(username,token))
+            commit_result = commit_response.json()
+        except:
+            pass
 
-        # try:
-        #     status_response = requests.get("https://api.github.com/repos/JabRef/jabref/statuses/%s" % pr_result["head"]["sha"], auth=(username,token))
-        #     status_result = status_response.json()[0]
-        # except:
-        #     status_result = {"state": "N/A"}
+        try:
+            status_response = requests.get("https://api.github.com/repos/google/ExoPlayer/statuses/%s" % pr_result["head"]["sha"], auth=(username,token))
+            status_result = status_response.json()[0]
+        except:
+            status_result = {"state": "N/A"}
         
 
 
         try:
-            issue_response = requests.get("https://api.github.com/repos/Jabref/jabref/issues/%s" % index)
-            issue_comments_response = requests.get("https://api.github.com/repos/Jabref/jabref/issues/%s/comments" % index)
+            issue_response = requests.get("https://api.github.com/repos/google/ExoPlayer/issues/%s" % index, auth=(username,token))
+            issue_comments_response = requests.get("https://api.github.com/repos/google/ExoPlayer/issues/%s/comments" % index, auth=(username,token))
             issue_result = issue_response.json()
             issue_result_comments = issue_comments_response.json()
             issue_result["number"] = index
         except:
             issue_result = {"number": index}
         
-        # #* See if valid PR
-        # try:
-        #     pr_result["message"]
-        # except:
-        #     #* Process Data
-        #     (pr_results, commit_results) = formatdata.format_data_pr(
-        #         index, 
-        #         pr_result, 
-        #         commit_result, 
-        #         status_result,
-        #         username,
-        #         token,
-        #         pr_result_comments
-        #     )
+        #* See if valid PR
+        try:
+            pr_result["message"]
+        except:
+            #* Process Data
+            (pr_results, commit_results) = formatdata.format_data_pr(
+                index, 
+                pr_result, 
+                commit_result, 
+                status_result,
+                username,
+                token,
+                pr_result_comments
+            )
 
-            # commits_list.append(commit_results)
-            # for item in pr_results:
-            #     pull_request_list.append(item)
+            commits_list.append(commit_results)
+            for item in pr_results:
+                pull_request_list.append(item)
 
         try:
             issue_result["message"]

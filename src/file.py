@@ -6,11 +6,11 @@ def pulls_to_csv(start_pull, stop_pull, owner, repo, filename="", merged="true",
 
     sep = "\a"
 
-    # df = pd.DataFrame(prs, columns=["PR Number", "Closed Date", "Author", "Title", "Body", "Comments", "Issue Number"])
-    # df.to_csv('./data/%s-pulls.csv' % filename, index=False, sep=sep)
+    df = pd.DataFrame(prs, columns=["PR Number", "Closed Date", "Author", "Title", "Body", "Comments", "Issue Number"])
+    df.to_csv('./data/%s-pulls.csv' % filename, index=False, sep=sep)
 
-    # df = pd.DataFrame(commits, columns=["PR Number", "Message", "Author", "Date", "Patch"])
-    # df.to_csv('./data/%s-commits.csv' % filename, index=False, sep=sep)
+    df = pd.DataFrame(commits, columns=["PR Number", "Message", "Author", "Date", "Patch"])
+    df.to_csv('./data/%s-commits.csv' % filename, index=False, sep=sep)
 
     df = pd.DataFrame(issues, columns=["Issue Number", "Date Issue Closed", "Author", "Title", "Body", "Comments"])
     df.to_csv('./data/%s-issues.csv' % filename, index=False, sep=sep)

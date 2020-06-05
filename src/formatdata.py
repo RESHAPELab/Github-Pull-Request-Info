@@ -1,6 +1,7 @@
 import database, logging, requests, base64, time, os
 
-database = database.query_db()
+database = None
+# database = database.query_db()
 github_accounts = {
         0: ['Githubfake01', '5RNsya*z#&aA'],
         1: ['GithubFake02', '9dJeg^Bp^g63'],
@@ -23,7 +24,7 @@ def file_exists(file, username, token):
 
     if path not in paths_memo:
         passed = False
-        url = "../repos/jabref"
+        url = "../repos/ExoPlayer"
         
         # Print Path
         if os.path.exists(url + path):
