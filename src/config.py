@@ -1,5 +1,5 @@
-def get_configs():
+def get_configs(path:str):
     import json
-    with open("./config.json", "r") as json_file:
+    with open(path, "r") as json_file:
         return json.loads(json_file.read())
     

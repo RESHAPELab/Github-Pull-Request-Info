@@ -1,0 +1,32 @@
+{
+    "general": {
+        "rate-threshold": 200,
+        "accounts": [
+            {"token":"5RNsya*z#&aA", "username":"Githubfake01"}
+        ]
+    },
+    "args": [
+        {
+            "type": "repos",
+            "owner": "jabref", "repo":"Jabref",
+            "sha": "get@pr/merge_commit_sha",
+            "range": {
+                "start": 0,
+                "stop": 4000
+            }
+        }
+    ],
+    "gather": [
+        {
+            "type": "repos",
+            "name": "API",
+            "data": {
+                "fetch": ["commits"],
+                "pipeline": ["get_apis"],
+                "get": {
+                    "commits/files": {"alias":"Files"}
+                }
+            }
+        }
+    ]
+}

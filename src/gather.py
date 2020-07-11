@@ -5,7 +5,14 @@ import src.args as types
 def run(args:list, gather:dict):
     results = []
     for arg in args:
-        for index in range(arg["range"]["start"], arg["range"]["stop"]):
+        try:
+            range_start = arg["range"]["start"]
+            range_end = arg["range"]["stop"]
+        except:
+            range_start = 0
+            range_end = 1
+
+        for index in range(range_start, range_end):
             for item in gather:
                 if arg["type"] != item["type"]: 
                     continue
@@ -22,5 +29,4 @@ def run(args:list, gather:dict):
 
 def request(index: int, data_type:str, arg:dict, item:dict):
     type_data = types.types[data_type](index, arg)
-    return api.request(type_data, item["data"]["fetch"], item["data"]["get"].keys())
-
+    return api.request(type_data, item["data"]["fetch"], item["data"]["get"])

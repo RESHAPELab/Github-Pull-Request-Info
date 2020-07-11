@@ -1,0 +1,28 @@
+{
+    "general": {
+        "rate-threshold": 200,
+        "accounts": [
+            {"token":"5RNsya*z#&aA", "username":"Githubfake01"}
+        ]
+    },
+    "args": [
+        {
+            "type": "author",
+            "username": "DanielRustrum"
+        }
+    ],
+    "gather": [
+        {
+            "type": "author",
+            "name": "Author",
+            "data": {
+                "fetch": ["author"],
+                "pipeline": ["get_repo_names"],
+                "get": {
+                    "author/login": {"alias":"Name"},
+                    "author/repos_url": {"alias":"Repos"}
+                }
+            }
+        }
+    ]
+}
