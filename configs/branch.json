@@ -1,0 +1,20 @@
+{
+    "general": {
+        "rate-threshold": 200,
+        "accounts": [
+            {"token":"5RNsya*z#&aA", "username":"Githubfake01"}
+        ]
+    },
+    "args": [],
+    "gather": [
+        {
+            "type": "branch-commits",
+            "name": "Commit",
+            "data": {
+                "fetch": ["branch-commits"],
+                "pipeline": ["filter_branch"],
+                "get": {}
+            }
+        }
+    ]
+}

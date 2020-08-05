@@ -29,7 +29,6 @@ def get_args(general, arg_list):
 
                     new_args = get_def(results, key_def[1:], arg)
                     args[arg] = new_args[arg]
-                    print(temp_args)
                 else:
                     #* NOTE: Filter Args
                     if arg in general:
@@ -93,5 +92,7 @@ def request(general:dict, fetches:list, items:list):
     for fetch in fetches:
         args = get_args(general, _endpoints[fetch]["args"])
         result = send_request(_endpoints[fetch]["url"](args))
+        if items == {}:
+            return result
         return parse_defs(result, items)
     

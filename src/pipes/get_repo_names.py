@@ -1,6 +1,6 @@
-import src.api as api
 
 def run(inp):
+    # print("Repo Name: %s" % inp)
     out = {}
     out["Name"] = inp["Name"]
     out["Repos"] = []
@@ -9,11 +9,7 @@ def run(inp):
         out["Repos"].append({
             "type": "repos",
             "owner": full_name[0],
-            "repo": full_name[1],
-            "sha": "get@pr/merge_commit_sha",
-            "range": {
-                "start": 0,
-                "stop": 1000
-            }
+            "repo": full_name[1]
         })
+    
     return out

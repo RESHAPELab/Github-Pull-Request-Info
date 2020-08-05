@@ -1,3 +1,3 @@
 def run(inp):
-    print(inp)
+    print(f"Logged: {inp}")
     return inp
