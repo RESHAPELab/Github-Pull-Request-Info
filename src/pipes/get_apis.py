@@ -25,7 +25,8 @@ def woc_imports(extension, line):
     except:
         return None
     
-
+# TODO: Add name of file to data
+# TODO: Put log data in results
 def run(inp):
     # print(inp)
 
@@ -47,6 +48,10 @@ def run(inp):
 
     apis = []
     langs = []
+    track_api = {}
+    track_lang = {}
+
+
     for file in inp["files"]:
         try:
             for line in file["patch"].split("\n"):
@@ -61,7 +66,6 @@ def run(inp):
                 apis.append(import_api)
                 langs.append(lang)
             
-            track_lang = {}
             for lang in langs:
                 if lang in track_lang:
                     pass
@@ -70,7 +74,6 @@ def run(inp):
                     out["langs"].append(lang)
 
 
-            track_api = {}
             for api in apis:
                 if api in track_api:
                     track_api[api] += 1
