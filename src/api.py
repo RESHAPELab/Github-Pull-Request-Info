@@ -66,15 +66,16 @@ def parse_defs(result, items):
 def get_def(results, defs, alias = ""):
     filtered = {}
     temp_dict = results
-
     for key_def in defs:
+        if type(key_def) != str:
+            continue
         for key in key_def:
-            if key_def in temp_dict:
+            try:
                 if key_def == defs[-1]:
                     if alias == "":
                         alias =  key_def
 
-                    if temp_dict[key_def][:4] == "http":
+                    if type(temp_dict[key_def]) == str and temp_dict[key_def][:4] == "http":
                         filtered[alias] = send_request(temp_dict[key_def])
                     else:
                         filtered[alias] = temp_dict[key_def]
@@ -83,9 +84,8 @@ def get_def(results, defs, alias = ""):
                         temp_dict = send_request(temp_dict[key_def])
                     else:
                         temp_dict = temp_dict[key_def]
-            else:
+            except:
                 break
-
     return filtered
 
 def request(general:dict, fetches:list, items:list):

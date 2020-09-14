@@ -1,6 +1,17 @@
 import re
 
-AUTHOR = "Daniel Rustrum"
+IMPLICT_CHECK = True 
+
+def implcit_check_java(line):
+    # import ...;
+    if line[0:6] == "import" and line[-1] == ";":
+        return line[6:-1]
+    else:
+        return None
+
+implict_woc = {
+    "java": implcit_check_java,
+    }
 
 woc_def = {
     "java": lambda line: re.search("[import ]([a-z]|[A-Z]|[.])+[;]", line).group(0),
@@ -16,35 +27,25 @@ woc_lang = {
     "go": "GO-Lang"
 }
 
-def count_defs():
-    return 0
-
 def woc_imports(extension, line):
     try:
-        return woc_def[extension](line)
+        if IMPLICT_CHECK:
+            return implict_woc[extension](line)
+        else:
+            return woc_def[extension](line)
     except:
         return None
     
 # TODO: Add name of file to data
 # TODO: Put log data in results
 def run(inp):
-    # print(inp)
-
-    try:
-        if inp["commit"]["author"] != AUTHOR:
-            return {}
-    except Exception as e:
-        pass
-
-        
-
     out = {
         "apis": [],
         "langs": []
     }
 
     if inp == {}:
-        return out
+        return {"message": "No APIs"}
 
     apis = []
     langs = []

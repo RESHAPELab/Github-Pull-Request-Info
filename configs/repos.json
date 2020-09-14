@@ -10,8 +10,8 @@
             "type": "repos",
             "owner": "jabref", "repo":"Jabref",
             "range": {
-                "start":999,
-                "stop":1012
+                "start":0,
+                "stop":4200
             }
         }
     ],
@@ -21,11 +21,14 @@
             "name": "Pulls",
             "data": {
                 "fetch": ["pr"],
-                "pipeline": ["example"],
+                "pipeline": ["issue_numbers","log_number"],
                 "get": {
-                    "pr/user/login": {"alias":"Author"},
-                    "pr/body": { "alias": "Body"},
-                    "pr/title": { "alias": "Title"}
+                    "pr/number": {"alias": "number"},
+                    "pr/state": {"alias": "state"},
+                    "pr/merged": {"alias": "is_merged"},
+                    "pr/title": {"alias": "title"},
+                    "pr/body": {"alias": "body"},
+                    "pr/commits_url": {"alias":"commit_data"}
                 }
             }
         }

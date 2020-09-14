@@ -1,0 +1,34 @@
+{
+    "general": {
+        "rate-threshold": 200,
+        "accounts": [
+            {"token":"5RNsya*z#&aA", "username":"Githubfake01"}
+        ]
+    },
+    "args": [
+        {
+            "type": "issue",
+            "owner": "jabref", "repo":"Jabref",
+            "range": {
+                "start":0,
+                "stop":7000
+            }
+        }
+    ],
+    "gather": [
+        {
+            "type": "issue",
+            "name": "Issues",
+            "data": {
+                "fetch": ["issue"],
+                "pipeline": ["log_number"],
+                "get": {
+                    "issue/number": {"alias":"number"},
+                    "issue/title": {"alias": "title"},
+                    "issue/body": {"alias": "body"},
+                    "issue/state": {"alias": "state"}
+                }
+            }
+        }
+    ]
+}
