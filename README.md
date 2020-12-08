@@ -5,10 +5,17 @@ This tool is written in the Python programming language, and leverages the GitHu
 
 
 ## Setup
-1. Install python:latest, postgres, and the python modules requests, psycopg2, and configs
-2. Change config values in `src/.conf` to suit run
-3. run `py ./src/init.py` from root directory
-
+1. Change the Config files in the configs directory to the desired outcome. You can have multiple configs.
+2. Change the main.py file to get the desired outcome. By default the main.py is set up to collect pull request information.
 
 ## How to run
-After setup run `py ./src/main.py` from root directory
+After setup run `python main.py` from root directory
+
+## Modufications
+If you want to add a new pipe, add a new python file to the directory `.\src\pipes` with that name being the name of the pipe. The program will call the run function within that file to operate so that needs to be in the newly created file. This is an example.
+ 
+``` python
+def run(inp):
+    print(f"Logged: {inp}")
+    return inp
+```

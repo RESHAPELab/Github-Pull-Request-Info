@@ -21,7 +21,7 @@
             "name": "Issues",
             "data": {
                 "fetch": ["issue"],
-                "pipeline": ["log_number"],
+                "pipeline": ["log"],
                 "get": {
                     "issue/number": {"alias":"number"},
                     "issue/title": {"alias": "title"},

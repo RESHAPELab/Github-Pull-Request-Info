@@ -21,7 +21,7 @@
             "name": "Pulls",
             "data": {
                 "fetch": ["pr"],
-                "pipeline": ["issue_numbers","log_number"],
+                "pipeline": ["issue_numbers", "log"],
                 "get": {
                     "pr/number": {"alias": "number"},
                     "pr/state": {"alias": "state"},
