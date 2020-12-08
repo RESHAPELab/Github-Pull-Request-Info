@@ -25,5 +25,10 @@ types = {
         "owner": args["owner"],
         "repo": args["repo"],
         "sha": args["sha"]
+    },
+    "issue" : lambda index, args: {
+        "index": index,
+        "owner": args["owner"],
+        "repo": args["repo"]
     }
 }
