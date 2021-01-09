@@ -12,7 +12,7 @@ This tool is written in the Python programming language, and leverages the GitHu
 After setup run `python main.py` from root directory
 
 ## Modufications
-If you want to add a new pipe, add a new python file to the directory `.\src\pipes` with that name being the name of the pipe. The program will call the run function within that file to operate so that needs to be in the newly created file. This is an example.
+If you want to add a new pipe, add a new python file to the directory `.\pipes` with that name being the name of the pipe. The program will call the run function within that file to operate so that needs to be in the newly created file. This is an example.
  
 ``` python
 def run(inp):
